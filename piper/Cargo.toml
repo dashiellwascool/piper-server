@@ -1,0 +1,15 @@
+[package]
+name = "piper"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+rust-embed = { version = "8.9.0", features = [ "interpolate-folder-path" ] }
+tracing = { workspace = true }
+hound = "3.5.1"
+anyhow = { workspace = true }
+thiserror = "2.0.17"
+
+[build-dependencies]
+cmake = "0.1.57"
+bindgen = "0.72.1"
