@@ -2,7 +2,10 @@ use axum::{http::StatusCode, Json};
 use serde_json::{json, Value};
 use tracing::{error, warn};
 
-pub fn make_error(code: StatusCode, message: &str) -> (StatusCode, Json<Value>) {
+pub const INTERNAL_ERROR_CODE: i32 = -1;
+pub const BAD_MODEL: i32 = 1;
+
+pub fn make_error(code: StatusCode, error_code: i32, message: &str) -> (StatusCode, Json<Value>) {
     if code.is_server_error() {
         error!("{code}: {message}");
     } else {
@@ -10,6 +13,7 @@ pub fn make_error(code: StatusCode, message: &str) -> (StatusCode, Json<Value>) 
     }
     let response = json!({
         "error": code.as_u16(),
+        "error_code": error_code,
         "message": message.to_string()
     });
 
@@ -21,5 +25,5 @@ pub fn make_error(code: StatusCode, message: &str) -> (StatusCode, Json<Value>) 
 //}
 
 pub fn anyhow_internal_error(err: anyhow::Error) -> (StatusCode, Json<Value>) {
-    make_error(StatusCode::INTERNAL_SERVER_ERROR, &err.to_string())
+    make_error(StatusCode::INTERNAL_SERVER_ERROR, INTERNAL_ERROR_CODE, &err.to_string())
 }

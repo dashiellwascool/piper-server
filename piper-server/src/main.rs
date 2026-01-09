@@ -6,7 +6,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use tracing::info;
 
-use crate::{errors::make_error, state::AppState};
+use crate::{errors::{make_error, BAD_MODEL}, state::AppState};
 
 mod errors;
 mod models;
@@ -61,7 +61,7 @@ async fn get_speakers(
     let model = state
         .models
         .get(model)
-        .ok_or_else(|| make_error(StatusCode::BAD_REQUEST, "Invalid model"))?;
+        .ok_or_else(|| make_error(StatusCode::BAD_REQUEST, BAD_MODEL, "Invalid model"))?;
 
     Ok(json!({
         "model": model.name,
@@ -83,7 +83,7 @@ async fn speak(
     let model_data = state
         .models
         .get(json.model.as_ref().unwrap_or(&state.default_model))
-        .ok_or_else(|| make_error(StatusCode::BAD_REQUEST, "Invalid model"))?;
+        .ok_or_else(|| make_error(StatusCode::BAD_REQUEST, BAD_MODEL, "Invalid model"))?;
 
     // get speaker id
     let speaker_id = if let Some(speaker) = &json.speaker {
