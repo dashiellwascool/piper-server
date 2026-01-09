@@ -78,7 +78,7 @@ pub fn get_models() -> Result<HashMap<String, VoiceModel>, ModelError> {
             if let Some(m) = models.insert(
                 model_json.dataset.clone(),
                 VoiceModel {
-                    name: model_json.dataset,
+                    name: format!("{} {}", model_json.language.code, model_json.dataset),
                     speakers: model_json.speaker_id_map,
                     onnx_file: entry.path().to_str().ok_or_else(|| ModelError::BadPath(entry.path()))?.to_owned(),
                     json_file: json_path.to_str().ok_or_else(|| ModelError::BadPath(json_path.clone()))?.to_owned(),

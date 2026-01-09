@@ -3,7 +3,7 @@ use axum::{
 };
 use piper::{init_piper, PiperOptions};
 use serde::Deserialize;
-use serde_json::Value;
+use serde_json::{json, Value};
 use tracing::info;
 
 use crate::{errors::make_error, state::AppState};
@@ -55,7 +55,7 @@ struct SpeakersQuery {
 async fn get_speakers(
     State(state): State<AppState>,
     Query(model): Query<SpeakersQuery>,
-) -> Result<Json<Vec<String>>, (StatusCode, Json<Value>)> {
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     let model = model.model.as_ref().unwrap_or(&state.default_model);
 
     let model = state
@@ -63,13 +63,10 @@ async fn get_speakers(
         .get(model)
         .ok_or_else(|| make_error(StatusCode::BAD_REQUEST, "Invalid model"))?;
 
-    Ok(Json::from(
-        model
-            .speakers
-            .keys()
-            .map(|s| s.to_owned())
-            .collect::<Vec<String>>(),
-    ))
+    Ok(json!({
+        "model": model.name,
+        "speakers": model.speakers.keys().map(|s| s.to_owned()).collect::<Vec<String>>()
+    }).into())
 }
 
 #[derive(Deserialize)]
