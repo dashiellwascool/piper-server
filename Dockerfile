@@ -1,5 +1,7 @@
-FROM rust:latest as builder
-WORKDIR /usr/src/piper-server
+FROM rust:latest
+RUN apt-get update && apt-get install -y cmake clang
+WORKDIR /app
 COPY . .
-RUN cargo run --release
+RUN cargo build --release
+CMD [ "cargo run --release"]
 
