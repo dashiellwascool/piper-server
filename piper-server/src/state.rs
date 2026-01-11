@@ -113,11 +113,11 @@ impl VoiceCache {
 
     async fn cache_invalidate_task(cache: Arc<Self>) {
         loop {
-            sleep(Duration::from_secs(60)).await;
+            sleep(Duration::from_secs(60 * 5)).await;
             let mut voices = cache.voices.lock().await;
             let mut i = 0;
             while i < voices.len() {
-                if Instant::now().duration_since(voices[i].inserted) >= Duration::from_secs(60 * 5) {
+                if Instant::now().duration_since(voices[i].inserted) >= Duration::from_secs(60) {
                     voices.remove(i);
                 } else {
                     i += 1;

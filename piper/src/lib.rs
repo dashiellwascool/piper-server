@@ -9,7 +9,7 @@ use std::{
 use hound::{SampleFormat, WavSpec};
 use rust_embed::Embed;
 use thiserror::Error;
-use tracing::error;
+use tracing::{error, info};
 
 use crate::libpiper::{
     piper_create, piper_default_synthesize_options, piper_free, piper_synthesize_next, piper_synthesize_start, piper_synthesizer
@@ -41,6 +41,7 @@ struct EspeakData;
 
 impl Drop for PiperSynth {
     fn drop(&mut self) {
+        info!("freeing synth");
         unsafe {
             piper_free(self.0);
         }
@@ -61,6 +62,7 @@ pub fn init_piper() {
 
 impl PiperSynth {
     pub fn init(model_path: &str, config_path: &str) -> PiperSynth {
+        info!("loading synth {}", model_path);
         let synth = unsafe {
             let model_path = CString::new(model_path).unwrap();
             let config_path = CString::new(config_path).unwrap();

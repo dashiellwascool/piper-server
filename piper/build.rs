@@ -1,15 +1,16 @@
 use std::{env, path::PathBuf};
 
-use cmake::{self, Config};
+use cmake::Config;
 
 const PATH: &str = "external/piper/libpiper";
 
 fn main() {
-    Config::new(PATH).build();
+    let mut c = Config::new(PATH);
+    c.build();
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    println!(
+   println!(
         "cargo::rustc-link-search={}",
         out_path.join("build").to_str().unwrap()
     );

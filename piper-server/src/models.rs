@@ -1,12 +1,7 @@
-use std::{
-    collections::HashMap,
-    fs,
-    io::BufReader,
-    path::PathBuf,
-};
+use std::{collections::HashMap, fs, io::BufReader, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
-use tracing::warn;
+use tracing::{info, warn};
 
 #[derive(Clone)]
 pub struct VoiceModel {
@@ -14,7 +9,7 @@ pub struct VoiceModel {
     pub speakers: HashMap<String, i32>,
     pub onnx_file: String,
     pub json_file: String,
-    pub suggested_settings: Inference
+    pub suggested_settings: Inference,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -44,7 +39,7 @@ pub enum ModelError {
     #[error("Json Error: {0}")]
     JsonError(#[from] serde_json::Error),
     #[error("Path is not unicode {0}")]
-    BadPath(PathBuf)
+    BadPath(PathBuf),
 }
 
 pub fn get_models() -> Result<HashMap<String, VoiceModel>, ModelError> {
@@ -75,16 +70,22 @@ pub fn get_models() -> Result<HashMap<String, VoiceModel>, ModelError> {
             // read json file
             let file = fs::File::open(&json_path)?;
             let model_json: ModelJson = serde_json::from_reader(BufReader::new(file))?;
-            if let Some(m) = models.insert(
-                model_json.dataset.clone(),
-                VoiceModel {
-                    name: format!("{} {}", model_json.language.code, model_json.dataset),
-                    speakers: model_json.speaker_id_map,
-                    onnx_file: entry.path().to_str().ok_or_else(|| ModelError::BadPath(entry.path()))?.to_owned(),
-                    json_file: json_path.to_str().ok_or_else(|| ModelError::BadPath(json_path.clone()))?.to_owned(),
-                    suggested_settings: model_json.inference.clone()
-                },
-            ) {
+            let model = VoiceModel {
+                name: format!("{} {}", model_json.language.code, model_json.dataset),
+                speakers: model_json.speaker_id_map,
+                onnx_file: entry
+                    .path()
+                    .to_str()
+                    .ok_or_else(|| ModelError::BadPath(entry.path()))?
+                    .to_owned(),
+                json_file: json_path
+                    .to_str()
+                    .ok_or_else(|| ModelError::BadPath(json_path.clone()))?
+                    .to_owned(),
+                suggested_settings: model_json.inference.clone(),
+            };
+            info!("Found model {}", model.name);
+            if let Some(m) = models.insert(model.name.clone(), model) {
                 warn!("There are multiple voice models with name {}!", m.name);
             }
         }

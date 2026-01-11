@@ -38,6 +38,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn get_models(State(state): State<AppState>) -> Json<Vec<String>> {
+    info!("got get_models request");
     Json::from(
         state
             .models
@@ -56,6 +57,7 @@ async fn get_speakers(
     State(state): State<AppState>,
     Query(model): Query<SpeakersQuery>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    info!("got get_speakers request");
     let model = model.model.as_ref().unwrap_or(&state.default_model);
 
     let model = state
@@ -80,6 +82,7 @@ async fn speak(
     State(state): State<AppState>,
     json: Json<SpeakBody>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
+    info!("got speak request");
     let model_data = state
         .models
         .get(json.model.as_ref().unwrap_or(&state.default_model))
