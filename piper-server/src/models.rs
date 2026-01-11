@@ -16,6 +16,7 @@ pub struct VoiceModel {
 struct ModelJson {
     pub dataset: String,
     pub inference: Inference,
+    #[serde(default)]
     pub speaker_id_map: HashMap<String, i32>,
     pub language: Language,
 }
